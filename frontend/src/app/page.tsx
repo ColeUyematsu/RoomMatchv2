@@ -6,13 +6,21 @@ import Image from "next/image";
 
 export default function Home() {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<null | boolean>(null); 
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     setIsLoggedIn(!!token);
   }, []);
 
+  if (isLoggedIn === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#D9D9D9] text-gray-900">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#D9D9D9] text-gray-900 text-center p-6">
       {/* Logo */}
