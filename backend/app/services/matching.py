@@ -25,12 +25,10 @@ def get_best_matches(user_id: int, db: Session, top_n=5):
     df = pd.DataFrame(response_data).set_index("user_id")
     df = df.groupby("user_id").last()  # Ensure we get the latest responses
 
-    print("User response DataFrame (Before Filling NaNs):\n", df.head())  # Debugging print
 
     # Fill missing values with 4 (neutral response)
     df.fillna(4, inplace=True)
 
-    print("User response DataFrame (After Filling NaNs):\n", df.head())  # Debugging print
 
     # Compute cosine similarity between all users
     similarity_matrix = cosine_similarity(df.values)

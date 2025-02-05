@@ -86,7 +86,7 @@ def register_user(
 # -----------------------
 @router.post("/token")
 def login_for_access_token(
-    username: str = Form(...),  # ✅ OAuth expects "username"
+    username: str = Form(...),  # OAuth expects "username"
     password: str = Form(...),
     db: Session = Depends(get_db)
 ):
@@ -94,8 +94,8 @@ def login_for_access_token(
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
-    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})  # ✅ Include user_id
-    return {"access_token": access_token, "user_id": user.id}  # ✅ Send user_id 
+    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})  # Include user_id
+    return {"access_token": access_token, "user_id": user.id}  # Send user_id 
 
 # -----------------------
 # Retrieve User Profile

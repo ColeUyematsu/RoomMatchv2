@@ -17,7 +17,7 @@ def logout(
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         jti = payload.get("jti")
         if jti:
-            revoke_token(db, jti)  # ✅ This should work now
+            revoke_token(db, jti)  # This should work now
             return {"message": "Logged out successfully!"}
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid token")

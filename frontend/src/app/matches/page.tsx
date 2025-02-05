@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getMatches } from "@/app/utils/api";
 import { useRouter } from "next/navigation";
 
-// ✅ Define the expected match type
+// Define the expected match type
 interface Match {
     userId: number;  
     matchId: number; 
@@ -28,10 +28,9 @@ export default function MatchesPage() {
   const fetchMatches = async () => {
     try {
       const data = await getMatches();
-      console.log("🔍 API Matches Response:", data); // ✅ Debugging
       setMatches(data);
     } catch (error) {
-      console.error("🚨 Error fetching matches:", error);
+      console.error("Error fetching matches:", error);
     }
   };
 
@@ -42,19 +41,18 @@ export default function MatchesPage() {
   };
 
   const startChat = (matchId: number) => {
-    const userId = localStorage.getItem("user_id"); // ✅ Retrieve stored userId
+    const userId = localStorage.getItem("user_id"); // Retrieve stored userId
   
     if (!userId) {
-      console.error("🚨 Error: userId is undefined! Fix API response.");
+      console.error("Error: userId is undefined! Fix API response.");
       return;
     }
   
     if (!matchId) {
-      console.error("🚨 Error: matchId is undefined! Check match object.");
+      console.error("Error: matchId is undefined! Check match object.");
       return;
     }
   
-    console.log(`Navigating to chat: /chat/${userId}/${matchId}`); // ✅ Debugging
     router.push(`/chat/${userId}/${matchId}`);
   };
 
@@ -90,7 +88,7 @@ export default function MatchesPage() {
                 className="bg-gray-400 text-black font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-gray-300 transition"
                 onClick={(e) => {
                     e.stopPropagation(); // Prevent collapsing when clicking chat
-                    startChat(match.matchId); // ✅ Only pass match.userId, not userId
+                    startChat(match.matchId); // Only pass match.userId, not userId
                 }}
                 >
                 Chat

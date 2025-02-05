@@ -16,4 +16,3 @@ class TestTable(Base):
 
 # Create the table
 Base.metadata.create_all(bind=engine)
-print("Table created successfully!")

@@ -4,7 +4,7 @@ from app.database import get_db
 from app.auth import get_current_user
 from app.services.matching import get_best_matches
 from app.schemas import MatchResponse
-from app.models import User  # ✅ Import User model
+from app.models import User  # Import User model
 from typing import List
 
 router = APIRouter()
@@ -50,9 +50,9 @@ def match_results(db: Session = Depends(get_db), current_user=Depends(get_curren
         matched_user = db.query(User).filter(User.email == match["match"]).first()
         if matched_user:
             match_results.append({
-                "matchId": matched_user.id,  # ✅ Get matchId
+                "matchId": matched_user.id,  # Get matchId
                 "match": match["match"],
-                "score": match["score"],  # ✅ Include score
+                "score": match["score"],  # Include score
             })
 
-    return match_results  # ✅ Now includes matchId and score
+    return match_results  # Now includes matchId and score

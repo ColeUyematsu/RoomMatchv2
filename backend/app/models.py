@@ -35,7 +35,7 @@ class Response(Base):
     __tablename__ = "responses"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)  # ✅ Ensure ForeignKey is linked properly
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)  # Ensure ForeignKey is linked properly
     question1 = Column(Integer) 
     question2 = Column(Integer)  
     question3 = Column(Integer)  
@@ -62,7 +62,7 @@ class Response(Base):
     question24 = Column(Integer)
     question25 = Column(Integer)
 
-    # ✅ Relationship with user
+    # Relationship with user
     user = relationship("User", back_populates="responses")
 
 class RevokedToken(Base):

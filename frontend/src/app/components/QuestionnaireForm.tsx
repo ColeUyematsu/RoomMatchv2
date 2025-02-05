@@ -37,7 +37,7 @@ export default function QuestionnaireForm() {
   const [responses, setResponses] = useState<number[]>(Array(25).fill(4)); // Default to neutral (4)
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch stored responses when the component loads
+  // Fetch stored responses when the component loads
   useEffect(() => {
     async function fetchUserResponses() {
       try {
@@ -52,7 +52,7 @@ export default function QuestionnaireForm() {
           setResponses(Object.values(response.data)); // Convert object to array
         }
       } catch (error) {
-        console.error("🚨 Error fetching user responses:", error);
+        console.error("Error fetching user responses:", error);
       } finally {
         setLoading(false);
       }
@@ -83,13 +83,13 @@ export default function QuestionnaireForm() {
         return;
       }
 
-      // ✅ Convert responses into URLSearchParams
+      // Convert responses into URLSearchParams
       const formData = new URLSearchParams();
       responses.forEach((value, index) => {
         formData.append(`question${index + 1}`, value.toString());
       });
 
-      // ✅ Send request to update questionnaire responses
+      // Send request to update questionnaire responses
       await api.post("/questionnaire/submit-questionnaire", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -97,7 +97,7 @@ export default function QuestionnaireForm() {
         },
       });
 
-      // ✅ Fetch the updated responses to ensure frontend state is correct
+      // Fetch the updated responses to ensure frontend state is correct
       const response = await api.get("/questionnaire/get-responses", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -106,10 +106,10 @@ export default function QuestionnaireForm() {
         setResponses(Object.values(response.data)); // Reload responses after saving
       }
 
-      alert("✅ Questionnaire submitted successfully!");
+      alert("Questionnaire submitted successfully!");
     } catch (error) {
-      console.error("🚨 Error submitting questionnaire:", error);
-      alert("❌ Failed to submit responses. Please try again.");
+      console.error("Error submitting questionnaire:", error);
+      alert("Failed to submit responses. Please try again.");
     }
 };
 

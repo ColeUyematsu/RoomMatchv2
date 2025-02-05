@@ -35,11 +35,10 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!userIdStr || !matchIdStr) {
-      console.error("🚨 userId or matchId is missing! Check routing.");
+      console.error("userId or matchId is missing! Check routing.");
       return;
     }
 
-    console.log("✅ Retrieved from URL:", { userId: userIdStr, matchId: matchIdStr });
 
     const fetchData = async () => {
       try {
@@ -58,7 +57,7 @@ export default function ChatPage() {
 
   const handleSend = async () => {
     if (!userIdStr || !matchIdStr) {
-      console.error("🚨 Cannot send message: userId or matchId is undefined!");
+      console.error("Cannot send message: userId or matchId is undefined!");
       return;
     }
 
@@ -116,12 +115,12 @@ export default function ChatPage() {
               <div
                 className={`p-3 rounded-lg max-w-xs break-words ${
                   isSentByUser
-                    ? "bg-blue-500 text-white text-right" // ✅ Sent messages (Blue, right)
-                    : "bg-gray-300 text-black text-left" // ✅ Received messages (Gray, left)
+                    ? "bg-blue-500 text-white text-right" // Sent messages (Blue, right)
+                    : "bg-gray-300 text-black text-left" // Received messages (Gray, left)
                 }`}
               >
                 {msg.content}
-                <p className="text-xs text-gray-500 mt-1">{new Date(msg.timestamp).toLocaleTimeString()}</p>
+                <p className="text-xs text-black-500 mt-1">{new Date(msg.timestamp).toLocaleTimeString()}</p>
               </div>
             </div>
           );

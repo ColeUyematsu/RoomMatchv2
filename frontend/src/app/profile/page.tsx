@@ -81,7 +81,7 @@ export default function Profile() {
     async function fetchData() {
       await fetchProfile();
       await fetchPrompts();
-      setLoading(false); // ✅ Ensure loading is set to false once everything loads
+      setLoading(false); // Ensure loading is set to false once everything loads
     }
   
     fetchData();

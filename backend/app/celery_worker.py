@@ -10,11 +10,9 @@ celery = Celery(
 @celery.task
 def run_matching_algorithm():
     """This function executes the roommate matching algorithm."""
-    print("🔄 Running the roommate matching algorithm...")
     
     # Your matching logic here
     # Example: Fetch users, compare questionnaire responses, and assign matches
     # ...
 
-    print("✅ Roommate matching algorithm completed!")
     return "Matching process finished."

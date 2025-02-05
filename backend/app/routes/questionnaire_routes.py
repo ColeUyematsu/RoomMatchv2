@@ -7,7 +7,6 @@ from app.auth import get_current_user
 
 router = APIRouter()
 
-# ✅ Enable logging for debugging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

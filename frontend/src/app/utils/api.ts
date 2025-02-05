@@ -1,14 +1,14 @@
-import axios, { AxiosError } from "axios"; // ✅ Import AxiosError
+import axios, { AxiosError } from "axios"; 
 
 
 const API_BASE_URL = "http://127.0.0.1:8000"; // Backend URL
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: { "Content-Type": "application/x-www-form-urlencoded" }, // ✅ Use URL Encoding
+  headers: { "Content-Type": "application/x-www-form-urlencoded" }, // Use URL Encoding
 });
 
-// ✅ Function to Register a New User with School Selection
+// Function to Register a New User with School Selection
 export const registerUser = async (email: string, password: string, school: string) => {
   try {
     const response = await api.post("/register", {
@@ -31,18 +31,18 @@ export const loginUser = async (email: string, password: string) => {
     formData.append("password", password);
 
     const response = await api.post("/token", formData);
-    const { access_token, user_id } = response.data; // ✅ Ensure backend returns user_id
+    const { access_token, user_id } = response.data; // Ensure backend returns user_id
 
     if (access_token && user_id) {
       localStorage.setItem("access_token", access_token);
-      localStorage.setItem("user_id", user_id.toString()); // ✅ Store userId
+      localStorage.setItem("user_id", user_id.toString()); // Store userId
     } else {
       throw new Error("User ID missing in login response");
     }
 
     return { access_token, user_id };
   } catch (err: unknown) {
-    console.error("🚨 Error logging in:", err);
+    console.error("Error logging in:", err);
     return null;
   }
 };
@@ -57,7 +57,6 @@ export const getMatches = async () => {
 
     const matches = response.data;
 
-    console.log("✅ API Response with matchId and score:", matches);
 
     const profileRequests = matches.map(async (match: { matchId: number; match: string; score: number }) => {
       try {
@@ -70,7 +69,7 @@ export const getMatches = async () => {
           userId: localStorage.getItem("user_id"),
           matchId: match.matchId,
           match: match.match,
-          score: match.score,  // ✅ No longer errors because API includes it
+          score: match.score,  // No longer errors because API includes it
           profile: profileResponse.data,
         };
       } catch (error) {
@@ -88,7 +87,7 @@ export const getMatches = async () => {
 
 export const getMatchProfile = async (matchId: string) => {
   if (!matchId) {
-    console.error("🚨 Cannot fetch match profile: matchId is missing!");
+    console.error("Cannot fetch match profile: matchId is missing!");
     return null;
   }
 
@@ -96,7 +95,6 @@ export const getMatchProfile = async (matchId: string) => {
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("No access token found.");
 
-    console.log(`📨 Fetching match profile from: http://127.0.0.1:8000/user-profile/${matchId}`);
 
     const response = await axios.get(`http://127.0.0.1:8000/user-profile/${matchId}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -104,7 +102,7 @@ export const getMatchProfile = async (matchId: string) => {
 
     return response.data;
   } catch (error) {
-    console.error("❌ Error fetching match profile:", error);
+    console.error("Error fetching match profile:", error);
     return null;
   }
 };
@@ -118,7 +116,7 @@ export const getUserProfile = async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    return response.data; // ✅ Return user data
+    return response.data; // Return user data
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return null;
@@ -132,7 +130,7 @@ export const submitQuestionnaire = async (responses: number[]) => {
 
     const formData = new URLSearchParams();
 
-    // ✅ Ensure all 25 questions are included
+    // Ensure all 25 questions are included
     for (let i = 0; i < 25; i++) {
       formData.append(`question${i + 1}`, responses[i]?.toString() || "4"); 
     }
@@ -146,7 +144,7 @@ export const submitQuestionnaire = async (responses: number[]) => {
 
     return response.data;
   } catch (error) {
-    console.error("🚨 Error submitting questionnaire:", error);
+    console.error("Error submitting questionnaire:", error);
     return false;
   }
 };
@@ -181,7 +179,7 @@ export const getUserResponses = async () => {
 
     return response.data;
   } catch (error) {
-    console.error("🚨 Error fetching user responses:", error);
+    console.error("Error fetching user responses:", error);
     return null;
   }
 };
@@ -189,7 +187,7 @@ export const getUserResponses = async () => {
 
 export const getMessages = async (userId: string, matchId: string) => {
   if (!userId || !matchId) {
-    console.error("🚨 Cannot fetch messages: userId or matchId is undefined!");
+    console.error("Cannot fetch messages: userId or matchId is undefined!");
     return [];
   }
 
@@ -197,7 +195,6 @@ export const getMessages = async (userId: string, matchId: string) => {
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("No access token found.");
 
-    console.log(`📨 Fetching messages from: http://127.0.0.1:8000/chat/messages/${userId}/${matchId}`);
 
     const response = await axios.get(`http://127.0.0.1:8000/chat/messages/${userId}/${matchId}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -205,7 +202,7 @@ export const getMessages = async (userId: string, matchId: string) => {
 
     return response.data;
   } catch (error) {
-    console.error("❌ Error fetching messages:", error);
+    console.error("Error fetching messages:", error);
     return [];
   }
 };
@@ -215,8 +212,6 @@ export const sendMessage = async (userId: string, matchId: string, message: stri
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("No access token found.");
 
-    console.log("📤 Sending message request to:", `http://127.0.0.1:8000/messages/${userId}/${matchId}`);
-    console.log("🔍 Payload:", { content: message });
 
     await axios.post(
       `http://127.0.0.1:8000/chat/messages/${userId}/${matchId}`,
@@ -224,6 +219,6 @@ export const sendMessage = async (userId: string, matchId: string, message: stri
       { headers: { Authorization: `Bearer ${token}` } }
     );
   } catch (error) {
-    console.error("🚨 Error sending message:", error);
+    console.error("Error sending message:", error);
   }
 };

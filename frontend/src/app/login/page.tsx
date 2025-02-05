@@ -19,12 +19,12 @@ export default function LoginPage() {
     const loginData = await loginUser(email, password);
   
     if (loginData && loginData.access_token && loginData.user_id) {
-      login(loginData.access_token, loginData.user_id); // ✅ Store userId in AuthContext
+      login(loginData.access_token, loginData.user_id); // Store userId in AuthContext
       setTimeout(() => {
-        router.push("/matches"); // ✅ Redirect user after state updates
+        router.push("/matches"); // Redirect user after state updates
       }, 100); // Small delay ensures state is updated before rerendering
     } else {
-      console.error("❌ Login failed. Check API response.");
+      console.error("Login failed. Check API response.");
     }
   };
 
