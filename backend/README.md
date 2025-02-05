@@ -34,6 +34,8 @@ Navigate to the backend directory:
 
 
 ## Start the backend Server 
-- uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+- uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
     - If you click on link it should say "RoomMatch API Running"
+
+- Rerun backend server after initially started run uvicorn app.main:app --reload
 
