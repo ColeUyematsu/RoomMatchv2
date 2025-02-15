@@ -28,14 +28,15 @@ export default function MatchesPage() {
   const fetchMatches = async () => {
     try {
       const data = await getMatches();
-      setMatches(data);
+      console.log("Fetched matches: ", data);
+      setMatches((prev) => (JSON.stringify(prev) !== JSON.stringify(data) ? data : prev));
     } catch (error) {
       console.error("Error fetching matches:", error);
     }
   };
 
   fetchMatches();
-}, []);
+}, []); 
   const toggleMatch = (matchId: string) => {
     setExpandedMatch((prev) => (prev === matchId ? null : matchId));
   };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext"; 
 import { getMessages, sendMessage, getMatchProfile } from "@/app/utils/api";
@@ -32,6 +32,8 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [matchProfile, setMatchProfile] = useState<MatchProfile | null>(null);
+  const fetchedMatchRef = useRef<string | null>(null); // Store last fetched matchId
+
 
   useEffect(() => {
     if (!userIdStr || !matchIdStr) {
@@ -39,7 +41,8 @@ export default function ChatPage() {
       return;
     }
 
-
+    if (fetchedMatchRef.current === matchIdStr) return;
+    fetchedMatchRef.current = matchIdStr; // Update ref
     const fetchData = async () => {
       try {
         const profileData = await getMatchProfile(matchIdStr);

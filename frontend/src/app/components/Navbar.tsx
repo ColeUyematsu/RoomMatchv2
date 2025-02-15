@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function Navbar() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
   const router = useRouter();
   const [hydrated, setHydrated] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
@@ -64,6 +64,7 @@ export default function Navbar() {
           <>
             <a href="/questionnaire">Questionnaire</a>
             <a href="/matches">Matches</a>
+            {isAdmin && <a href="/admin">Admin Panel</a>}
             <div className="relative">
               <button onClick={() => setShowDropdown(!showDropdown)} className="focus:outline-none">
                 <img

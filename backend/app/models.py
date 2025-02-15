@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Float, func
 from datetime import datetime
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from app.database import Base
+from sqlalchemy import select
 
 class User(Base):
     __tablename__ = "users"
@@ -11,7 +13,31 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     school = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
-    
+    is_admin = Column(Boolean, default=False)
+
+    matches = relationship(
+        "Match",
+        primaryjoin="or_(User.id == Match.user_id, User.id == Match.match_id)",
+        back_populates="user",
+        overlaps="matched_users"
+    )
+
+    @hybrid_property
+    def is_matched(self):
+        """Works in Python: Returns True if the user has 5 or more matches"""
+        return len(self.matches) >= 5
+
+    @is_matched.expression
+    def is_matched(cls):
+        """Works in Queries: Returns True if the user has 5+ matches in SQLAlchemy"""
+        return (
+            select(func.count(Match.id))
+            .where((Match.user_id == cls.id) | (Match.match_id == cls.id))
+            .scalar_subquery()
+        ) >= 5
+
+    requested_new_match = Column(Boolean, nullable=True)
+
     # New fields for additional user details
     hometown = Column(String, nullable=True)
     major = Column(String, nullable=True)
@@ -19,14 +45,14 @@ class User(Base):
     interests = Column(String, nullable=True)
     
     # Profile customization
-    profile_picture = Column(String, nullable=True)  # Stores image URL or path
-    prompt1 = Column(String, nullable=True)  # Stores the selected prompt
-    response1 = Column(String, nullable=True)  # Stores the user response
+    profile_picture = Column(String, nullable=True)  
+    prompt1 = Column(String, nullable=True) 
+    response1 = Column(String, nullable=True)  
     prompt2 = Column(String, nullable=True)
     response2 = Column(String, nullable=True)
     prompt3 = Column(String, nullable=True)
     response3 = Column(String, nullable=True)
-    
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     responses = relationship("Response", back_populates="user", cascade="all, delete")
@@ -81,8 +107,8 @@ class Match(Base):
     similarity_score = Column(Float)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    user = relationship("User", foreign_keys=[user_id])
-    matched_user = relationship("User", foreign_keys=[match_id])
+    user = relationship("User", foreign_keys=[user_id], backref="matched_users", overlaps="matches")
+    matched_user = relationship("User", foreign_keys=[match_id], overlaps="matches")
     
 class Message(Base):
     __tablename__ = "messages"

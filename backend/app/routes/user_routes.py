@@ -94,7 +94,8 @@ def login_for_access_token(
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
-    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})  # Include user_id
+    access_token = create_access_token(data={"sub": user.email, "user_id": user.id, "is_admin": user.is_admin})  # Include user_id
+    
     return {"access_token": access_token, "user_id": user.id}  # Send user_id 
 
 # -----------------------
@@ -233,3 +234,14 @@ def get_matches(
         raise HTTPException(status_code=404, detail="No matches found")
 
     return {"matches": matches}
+
+@router.post("/request-new-match")
+def request_new_match(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Allows a user to request a new match."""
+    
+    current_user.requested_new_match = True
+    db.commit()
+    return {"message": "You have requested a new match."}

@@ -51,8 +51,14 @@ export const getMatches = async () => {
   if (!token) return [];
 
   try {
+    console.log("Fetching matches..."); // Debugging
     const response = await axios.get("http://127.0.0.1:8000/match-results", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { 
+        Authorization: `Bearer ${token}` ,
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
     });
 
     const matches = response.data;
