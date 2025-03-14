@@ -11,16 +11,22 @@ export const api = axios.create({
 // Function to Register a New User with School Selection
 export const registerUser = async (email: string, password: string, school: string) => {
   try {
-    const response = await api.post("/register", {
-      email,
-      password,
-      school, // Add school field
+    const response = await fetch("http://127.0.0.1:8000/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ email, password, school }).toString(),
     });
 
-    return response.data;
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message || "Registration failed." };
+    }
+
+    return { success: true };
   } catch (error) {
-    console.error("Error registering user:", error);
-    return null;
+    return { success: false, message: "Server error. Please try again." };
   }
 };
 
