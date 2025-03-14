@@ -24,7 +24,7 @@ export default function AdminPanel() {
             });
 
             const data = await response.json();
-            if (response.ok) {
+            if (response.ok) {          
                 setUnmatchedUsers(data.unmatched_users);
                 setMatchedUsers(data.matched_users);
                 fetchMatches(); // Fetch matches after users are updated
@@ -39,7 +39,7 @@ export default function AdminPanel() {
     const fetchMatches = async () => {
         try {
             const token = localStorage.getItem("access_token");
-            const response = await fetch("http://127.0.0.1:8000/matches", {
+            const response = await fetch("http://127.0.0.1:8000/match-users", {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -49,6 +49,9 @@ export default function AdminPanel() {
             const data = await response.json();
             if (response.ok) {
                 setMatches(data.matches);
+            }
+            else {
+                setMatches([]);  
             }
         } catch (error) {
             setMessage("Server error. Could not load matches.");
@@ -70,11 +73,15 @@ export default function AdminPanel() {
 
             const data = await response.json();
             if (response.ok) {
-                setMatches(data.matches);
-                setMessage(" Matching successful!");
-                fetchUsers(); // Fetch users and update the match table
+                if (data.matches && data.matches.length > 0) {
+                    setMatches(data.matches);
+                    setMessage("Matching successful!");
+                } else {
+                    setMessage("No new matches were found.");
+                }
+                fetchUsers(); // Refresh user data
             } else {
-                setMessage(`⚠️ Error: ${data.detail}`);
+                setMessage(`Error: ${data.detail}`);
             }
         } catch (error) {
             setMessage("Server error. Please try again.");
@@ -142,7 +149,7 @@ export default function AdminPanel() {
             </div>
 
             {/* Matched Pairs */}
-            {matches.length > 0 && (
+            {(matches ?? []).length > 0 && (
                 <div className="bg-white shadow-lg rounded-lg p-6 mt-8 w-full max-w-lg">
                     <h3 className="text-xl font-bold text-gray-800 text-center">Matched Pairs</h3>
                     <div className="mt-4 space-y-4">

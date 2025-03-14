@@ -20,7 +20,7 @@ export default function MatchOptions() {
             if (response.ok) {
                 setMessage("You have requested a new match.");
             } else {
-                setMessage(`⚠️ Error: ${data.detail}`);
+                setMessage(`Error: ${data.detail}`);
             }
         } catch (error) {
             setMessage("Server error. Please try again.");
@@ -30,7 +30,7 @@ export default function MatchOptions() {
     return (
         <div className="match-options">
             <button onClick={handleRequestNewMatch} className="new-match-button">
-                🔄 Request New Match
+                Request New Match
             </button>
             {message && <p className="message">{message}</p>}
         </div>
