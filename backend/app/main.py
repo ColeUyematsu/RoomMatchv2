@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.config import engine, Base
-from app.routes import user_routes, match_routes, response_routes, admin_routes, logout_route, questionnaire_routes
+from app.routes import user_routes, match_routes, response_routes, admin_routes, questionnaire_routes
 from app.routes import chat_routes
 
 # Create database tables if they don't exist
@@ -21,7 +21,6 @@ app.include_router(user_routes.router)
 app.include_router(match_routes.router)
 app.include_router(response_routes.router)
 app.include_router(admin_routes.router)
-app.include_router(logout_route.router)# Enable CORS for frontend access
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Replace with frontend URL in production
