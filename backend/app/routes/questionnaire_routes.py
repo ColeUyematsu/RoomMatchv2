@@ -70,7 +70,7 @@ def get_user_responses(
     response = db.query(Response).filter(Response.user_id == user_id).first()
 
     if not response:
-        raise HTTPException(status_code=404, detail="No questionnaire responses found")
+        return
 
     return {
         "question1": response.question1,

@@ -46,7 +46,7 @@ def match_results(db: Session = Depends(get_db), current_user=Depends(get_curren
     ).all()
 
     if not matches:
-        raise HTTPException(status_code=404, detail="No matches found.")
+        return []
 
     match_results = []
     for match in matches:
