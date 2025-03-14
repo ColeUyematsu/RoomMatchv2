@@ -9,7 +9,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [school, setSchool] = useState("");
   const [error, setError] = useState("");
-  const [filteredSchools, setFilteredSchools] = useState<string[]>([]); // Suggestions
+  const [filteredSchools, setFilteredSchools] = useState<string[]>([]);
   const router = useRouter();
 
   // List of supported schools
@@ -23,20 +23,15 @@ export default function RegisterPage() {
     "UC Berkeley",
     "MIT",
     "Harvard University",
-    "Other", // Keeps flexibility
+    "Other",
   ];
 
   // Filter schools based on input
   const handleSchoolInput = (input: string) => {
     setSchool(input);
-    if (input) {
-      const filtered = schools.filter((s) =>
-        s.toLowerCase().includes(input.toLowerCase())
-      );
-      setFilteredSchools(filtered);
-    } else {
-      setFilteredSchools([]);
-    }
+    setFilteredSchools(
+      input ? schools.filter((s) => s.toLowerCase().includes(input.toLowerCase())) : []
+    );
   };
 
   const handleRegister = async () => {
@@ -45,11 +40,15 @@ export default function RegisterPage() {
       return;
     }
 
-    const result = await registerUser(email, password, school);
-    if (result) {
-      router.push("/login"); // Redirect to login after success
-    } else {
-      setError("Registration failed.");
+    try {
+      const response = await registerUser(email, password, school);
+      if (response.success) {
+        router.push("/login"); // Redirect to login after success
+      } else {
+        setError(response.message); // Display backend error message
+      }
+    } catch (error) {
+      setError("Server error. Please try again.");
     }
   };
 
@@ -83,7 +82,6 @@ export default function RegisterPage() {
           value={school}
           onChange={(e) => handleSchoolInput(e.target.value)}
         />
-        {/* Dropdown suggestions */}
         {filteredSchools.length > 0 && (
           <ul className="absolute left-0 right-0 bg-white border mt-1 max-h-40 overflow-auto rounded shadow-md">
             {filteredSchools.map((s, index) => (
@@ -92,7 +90,7 @@ export default function RegisterPage() {
                 className="p-2 cursor-pointer hover:bg-gray-200"
                 onClick={() => {
                   setSchool(s);
-                  setFilteredSchools([]); // Hide suggestions
+                  setFilteredSchools([]);
                 }}
               >
                 {s}
