@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Form, UploadFile, File
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from app.database import get_db
@@ -9,20 +10,51 @@ from app.auth import get_current_user, verify_password
 from app.services.matching import get_best_matches
 import os
 import shutil
+import re
 
 router = APIRouter()
 
 # Token expiration time
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+SCHOOL_EMAIL_DOMAINS = {
+    "Pomona College": "mymail.pomona.edu",
+    "Claremont McKenna College": "cmc.edu",
+    "Harvey Mudd College": "hmc.edu",
+    "Scripps College": "scrippscollege.edu",
+    "Pitzer College": "students.pitzer.edu",
+    "Stanford University": "stanford.edu",
+    "UC Berkeley": "berkeley.edu",
+    "MIT": "mit.edu",
+    "Harvard University": "harvard.edu",
+    # Add more schools and their domains as needed
+}
+
+
 # Profile picture upload directory
 UPLOAD_DIR = "static/profile_pics"
 os.makedirs(UPLOAD_DIR, exist_ok=True)  # Ensure directory exists
 
+PASSWORD_REGEX = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$"
+
+def validate_password(password: str):
+    """Ensure password meets security criteria."""
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long."
+    if not re.search(r"[A-Z]", password):
+        return False, "Password must contain at least one uppercase letter."
+    if not re.search(r"[a-z]", password):
+        return False, "Password must contain at least one lowercase letter."
+    if not re.search(r"\d", password):
+        return False, "Password must contain at least one number."
+    if not re.search(r"[@$!%*?&#]", password):
+        return False, "Password must contain at least one special character (@, $, !, %, *, ?, &)."
+    return True, ""
+
 # -----------------------
 # User Registration
 # -----------------------
-@router.post("/register", response_model=dict)
+@router.post("/register")
 def register_user(
     email: str = Form(...),
     password: str = Form(...),
@@ -41,45 +73,80 @@ def register_user(
     db: Session = Depends(get_db)
 ):
     """Registers a new user with optional profile details."""
+
+    # 🔹 Check if email format is valid
+    if "@" not in email or "." not in email.split("@")[-1]:
+        return JSONResponse(status_code=400, content={"success": False, "message": "Invalid email format. Please enter a valid email."})
+
+    email_domain = email.split("@")[-1]
+    expected_domain = SCHOOL_EMAIL_DOMAINS.get(school)
+
+    # 🔹 Check if email matches the school's domain
+    if expected_domain and email_domain != expected_domain:
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "message": f"Email does not match {school}. Use an email ending with @{expected_domain}."}
+        )
+
+    # 🔹 Validate password strength
+    is_valid_password, password_error = validate_password(password)
+    if not is_valid_password:
+        return JSONResponse(status_code=400, content={"success": False, "message": password_error})
+
+    # 🔹 Check if email is already registered
     existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "message": "This email is already registered. Try logging in."}
+        )
 
-    hashed_password = get_password_hash(password)
+    try:
+        hashed_password = get_password_hash(password)
 
-    # Save profile picture if uploaded
-    profile_pic_path = None
-    if profile_picture:
-        filename = f"user_{email.replace('@', '_').replace('.', '_')}.jpg"
-        file_path = os.path.join(UPLOAD_DIR, filename)
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(profile_picture.file, buffer)
-        profile_pic_path = f"/static/profile_pics/{filename}"
+        # 🔹 Save profile picture if uploaded
+        profile_pic_path = None
+        if profile_picture:
+            try:
+                filename = f"user_{email.replace('@', '_').replace('.', '_')}.jpg"
+                file_path = os.path.join(UPLOAD_DIR, filename)
+                with open(file_path, "wb") as buffer:
+                    shutil.copyfileobj(profile_picture.file, buffer)
+                profile_pic_path = f"/static/profile_pics/{filename}"
+            except Exception as e:
+                return JSONResponse(
+                    status_code=400,
+                    content={"success": False, "message": f"Error uploading profile picture: {str(e)}"}
+                )
 
-    new_user = User(
-        email=email,
-        hashed_password=hashed_password,
-        school=school,
-        hometown=hometown,
-        major=major,
-        graduation_year=graduation_year,
-        interests=interests,
-        prompt1=prompt1,
-        response1=response1,
-        prompt2=prompt2,
-        response2=response2,
-        prompt3=prompt3,
-        response3=response3,
-        profile_picture=profile_pic_path,
-        is_active=True
-    )
+        # 🔹 Create user in the database
+        new_user = User(
+            email=email,
+            hashed_password=hashed_password,
+            school=school,
+            hometown=hometown,
+            major=major,
+            graduation_year=graduation_year,
+            interests=interests,
+            prompt1=prompt1,
+            response1=response1,
+            prompt2=prompt2,
+            response2=response2,
+            prompt3=prompt3,
+            response3=response3,
+            profile_picture=profile_pic_path,
+            is_active=True
+        )
 
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
 
-    return {"message": "User registered successfully!"}
+        return JSONResponse(status_code=201, content={"success": True, "message": "User registered successfully! You can now log in."})
 
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(status_code=500, content={"success": False, "message": f"Registration failed: {str(e)}"})
 
 # -----------------------
 # Login (Token Generation)
@@ -98,6 +165,7 @@ def login_for_access_token(
     
     return {"access_token": access_token, "user_id": user.id}  # Send user_id 
 
+# The rest of your routes remain unchanged
 # -----------------------
 # Retrieve User Profile
 # -----------------------
@@ -187,15 +255,15 @@ async def update_profile(
 def get_available_prompts():
     """Returns a list of predefined prompt options."""
     prompts = [
-        "What’s something unique about you?",
-        "What’s your ideal weekend?",
+        "What's something unique about you?",
+        "What's your ideal weekend?",
         "Describe your perfect roommate situation.",
-        "What’s a fun fact about yourself?",
-        "What’s your favorite hobby?",
-        "What’s a dealbreaker in a roommate?",
+        "What's a fun fact about yourself?",
+        "What's your favorite hobby?",
+        "What's a dealbreaker in a roommate?",
         "How do you handle conflict?",
-        "What’s your sleep schedule like?",
-        "What’s your go-to comfort meal?",
+        "What's your sleep schedule like?",
+        "What's your go-to comfort meal?",
         "Do you prefer a quiet or social living space?"
     ]
     return prompts
